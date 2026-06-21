@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen Avanzado - POTA Logbook</title>
+    
+    <!-- Evita que Chrome arroje el error 404 del favicon -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+    <style>
+        :root { 
+            --primary: #3b82f6; 
+            --primary-hover: #60a5fa;
+            --success: #10b981; 
+            --success-hover: #34d399;
+            --danger: #ef4444; 
+            --danger-hover: #f87171;
+            --bg: #ffffff; 
+            --card-bg: #1e293b; 
+            --card-bg-inner: #334155; 
+            --text-main: #f8fafc; 
+            --text-muted: #94a3b8; 
+            --border: #475569;        
+        }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            margin: 0; 
+            padding: 24px;
+            background: var(--bg); 
+            color: #0f172a; 
+            display: flex; 
+            justify-content: center;
+        }
+        .container { width: 100%; max-width: 1350px; display: flex; flex-direction: column; gap: 20px; }
+        .box { background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border); }
+        
+        h1 { margin: 0 0 4px 0; font-size: 1.6rem; font-weight: 700; color: var(--text-main); }
+        .subtitle { color: var(--text-muted); margin: 0 0 20px 0; font-size: 0.95rem; }
+        h2 { margin: 0 0 14px 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); padding-bottom: 8px; color: var(--text-main); }
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 14px; 
+            margin-bottom: 20px; 
+        }
+        .stat-card { 
+            background: var(--card-bg-inner); 
+            padding: 16px; 
+            border-radius: 8px; 
+            border: 1px solid var(--border); 
+            text-align: center; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .stat-val { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+        .stat-val.success { color: var(--success); }
+        .stat-lbl { font-size: 0.75rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-top: 4px; }
+        
+        .stat-sub-lbl { font-size: 0.7rem; font-weight: bold; color: var(--text-main); margin-top: 2px; }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 10px;
+        }
+        .detail-box {
+            background: var(--card-bg-inner);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .compact-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .compact-table th, .compact-table td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main); 
+        }
+        .compact-table th {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .compact-table tr:last-child td { border-bottom: none; }
+        .badge-count {
+            background: var(--card-bg);
+            color: var(--primary-hover);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            float: right;
+        }
+        .actions-row { display: flex; gap: 14px; margin-top: 10px; }
+        button { 
+            flex: 1; padding: 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.95rem; 
+            background: var(--card-bg-inner); color: var(--text-main); cursor: pointer; font-weight: 600; width: 100%;
+            transition: all 0.2s ease;
+        }
+        button:hover { background: var(--border); }
+        button.btn-success { background: var(--success); border-color: var(--success); }
+        button.btn-success:hover { filter: brightness(1.1); }
+        button.btn-primary { background: var(--primary); border-color: var(--primary); }
+        button.btn-primary:hover { filter: brightness(1.1); }
+        button.btn-back { background: transparent; border-color: var(--border); color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="box">
+            <h1>RESUMEN DE LA ACTIVIDAD</h1>
+            <p class="subtitle" id="infoActividadSub">Analisis avanzado de la activacion.</p>
+            
+            <h2>Estadisticas Generales</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div id="statTotal" class="stat-val success">...</div>
+                    <div class="stat-lbl">Total QSOs</div>
+                </div>
+                <div class="stat-card">
+                    <div id="statModos" class="stat-val">...</div>
+                    <div class="stat-lbl">Modos</div>
+                </div>
+                <div class="stat-card">
+                    <div id="statPaises" class="stat-val">...</div>
+                    <div class="stat-lbl">Paises</div>
+                </div>
+                <div class="stat-card" style="min-width: 180px;">
+                    <div id="statInicio" class="stat-sub-lbl" style="color: var(--primary-hover);">Inicio: --:-- UTC</div>
+                    <div id="statFin" class="stat-sub-lbl" style="color: var(--success-hover);">Fin: --:-- UTC</div>
+                    <div class="stat-lbl" style="margin-top: 8px;">Ventana Temporal</div>
+                </div>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-box">
+                    <h2>Uso de Bandas</h2>
+                    <table class="compact-table">
+                        <thead>
+                            <tr><th>Banda</th><th style="text-align: right;">QSOs</th></tr>
+                        </thead>
+                        <tbody id="listaBandas"></tbody>
+                    </table>
+                </div>
+                <div class="detail-box">
+                    <h2>Uso de Modos</h2>
+                    <table class="compact-table">
+                        <thead>
+                            <tr><th>Modo</th><th style="text-align: right;">QSOs</th></tr>
+                        </thead>
+                        <tbody id="listaModos"></tbody>
+                    </table>
+                </div>
+                <div class="detail-box">
+                    <h2>Distritos EA Trabajados</h2>
+                    <table class="compact-table">
+                        <thead>
+                            <tr><th>Distrito</th><th style="text-align: right;">QSOs</th></tr>
+                        </thead>
+                        <tbody id="listaZonas"></tbody>
+                    </table>
+                </div>
+
+                <div class="detail-box">
+                    <h2>Paises Logueados (DX)</h2>
+                    <table class="compact-table">
+                        <thead>
+                            <tr><th>Pais</th><th style="text-align: right;">QSOs</th></tr>
+                        </thead>
+                        <tbody id="listaPaises"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <h2>Acciones</h2>
+            <div class="actions-row">
+                <button class="btn-back" onclick="volverAlPanel()">Volver al Panel</button>
+                <button class="btn-success" onclick="descargarADIF()">Descargar Logbook (.adi)</button>
+                <button class="btn-primary" onclick="descargarCSV()">Descargar historial de QSOs</button>
+                <button class="btn-primary" style="background:#8b5cf6; border-color:#8b5cf6;" onclick="descargarPDF()">Descargar resumen en PDF</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', calcularResumenAvanzado);
+
+        async function calcularResumenAvanzado() {
+            try {
+                var res = await fetch('/api/contactos');
+                var data = await res.json();
+                
+                var actividad = data.actividad;
+                var listaCruda = data.lista || [];
+                
+                // CORRECCIÓN: Filtrado con .startsWith() para erradicar cualquier tipo de anuncio dinámico de las estadísticas finales
+                var contactos = listaCruda.filter(function(c) {
+                    return c.indicativo && 
+                           !c.indicativo.startsWith("||_ANUNCIO_OFICIAL_POTA_||") && 
+                           !c.indicativo.startsWith("||_ANUNCIO_OFICIAL_POTA_||");
+                });
+                
+                if (actividad) {
+                    var tipoLimpio = actividad.tipo ? actividad.tipo.replace('_FINALIZADA', '') : 'POTA';
+                    var textoSub = 'Datos acumulados para la actividad ' + tipoLimpio + ' - Referencia: ' + (actividad.referencia || '-');
+                    var elSub = document.getElementById('infoActividadSub');
+                    if (elSub) elSub.innerText = textoSub;
+                }
+
+                if (!contactos || contactos.length === 0) {
+                    ponValoresVacios();
+                    return;
+                }
+                var totalQSOs = contactos.length;
+                var conteoModos = {}, conteoBandas = {}, conteoPaises = {}, conteoZonas = {};
+                var totalModos = 0, totalPaises = 0;
+                for (var i = 0; i < contactos.length; i++) {
+                    var q = contactos[i];
+                    
+                    var mod = q.modo || 'SSB';
+                    if (!conteoModos[mod]) { conteoModos[mod] = 0; totalModos++; }
+                    conteoModos[mod]++;
+
+                    var band = q.banda || 'Desconocida';
+                    if (!conteoBandas[band]) conteoBandas[band] = 0;
+                    conteoBandas[band]++;
+
+                    var pais = q.pais || 'Internacional';
+                    if (!conteoPaises[pais]) { conteoPaises[pais] = 0; totalPaises++; }
+                    conteoPaises[pais]++;
+
+                    var zona = q.zonaEA || 'No EA';
+                    if (zona !== 'No EA') {
+                        if (!conteoZonas[zona]) conteoZonas[zona] = 0;
+                        conteoZonas[zona]++;
+                    }
+                }
+                document.getElementById('statTotal').innerText = totalQSOs;
+                document.getElementById('statModos').innerText = totalModos;
+                document.getElementById('statPaises').innerText = totalPaises;
+
+                var primerQso = contactos[contactos.length - 1]; 
+                var ultimoQso = contactos[0]; 
+                
+                var horaInicio = '--:--';
+                if (primerQso && primerQso.fecha) {
+                    var matchInicio = primerQso.fecha.match(/(\d{2}):(\d{2})/);
+                    if (matchInicio && matchInicio[1] && matchInicio[2]) {
+                        horaInicio = matchInicio[1] + ':' + matchInicio[2];
+                    }
+                }
+                
+                var horaFin = '--:--';
+                if (ultimoQso && ultimoQso.fecha) {
+                    var matchFin = ultimoQso.fecha.match(/(\d{2}):(\d{2})/);
+                    if (matchFin && matchFin[1] && matchFin[2]) {
+                        horaFin = matchFin[1] + ':' + matchFin[2];
+                    }
+                }
+
+                document.getElementById('statInicio').innerText = 'Inicio: ' + horaInicio + ' UTC';
+                document.getElementById('statFin').innerText = 'Fin: ' + horaFin + ' UTC';
+
+                renderizarTablaObjeto('listaBandas', conteoBandas);
+                renderizarTablaObjeto('listaModos', conteoModos);
+                renderizarTablaObjeto('listaZonas', conteoZonas);
+                renderizarTablaObjeto('listaPaises', conteoPaises);
+
+            } catch (error) {
+                console.error("Error cargando estadisticas:", error);
+            }
+        }
+        function renderizarTablaObjeto(idElemento, objetoDatos) {
+            var tbody = document.getElementById(idElemento);
+            if (!tbody) return;
+            var html = '';
+            var elementosOrdenados = [];
+            for (var clave in objetoDatos) {
+                if (objetoDatos.hasOwnProperty(clave)) {
+                    elementosOrdenados.push({ nombre: clave, cantidad: objetoDatos[clave] });
+                }
+            }
+            elementosOrdenados.sort(function(a, b) { return b.cantidad - a.cantidad; });
+            for (var i = 0; i < elementosOrdenados.length; i++) {
+                var el = elementosOrdenados[i];
+                html += '<tr><td>' + el.nombre + '</td><td><span class="badge-count">' + el.cantidad + '</span></td></tr>';
+            }
+            tbody.innerHTML = html;
+        }
+
+        function ponValoresVacios() {
+            document.getElementById('statTotal').innerText = '0';
+            document.getElementById('statModos').innerText = '0';
+            document.getElementById('statPaises').innerText = '0';
+            document.getElementById('statInicio').innerText = 'Inicio: --:-- UTC';
+            document.getElementById('statFin').innerText = 'Fin: --:-- UTC';
+        }
+
+        function descargarADIF() { window.location.href = '/api/exportar-adif'; }
+        function descargarCSV() { window.location.href = '/api/exportar-csv'; }
+        function descargarPDF() { window.location.href = '/api/exportar-pdf'; }
+        function volverAlPanel() { window.location.href = '/admin/'; }
+    </script>
+</body>
+</html>
