@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel POTA - Administrador</title>
+    <style>
+        :root { 
+            --primary: #3b82f6; 
+            --primary-hover: #60a5fa;
+            --success: #10b981; 
+            --success-hover: #34d399;
+            --danger: #ef4444; 
+            --danger-hover: #f87171;
+            
+            --bg: #f1f5f9; 
+            --card-bg: #0f172a;       
+            --card-bg-inner: #1e293b; 
+            --text-main: #f8fafc;     
+            --text-muted: #94a3b8;    
+            --border: #334155;        
+            
+            --radius: 12px;
+            --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+        }
+        
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            margin: 0; 
+            padding: 16px;
+            background: var(--bg); 
+            color: var(--text-main);
+            display: flex; 
+            align-items: stretch; 
+            gap: 16px; 
+            box-sizing: border-box;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        h2 { 
+            margin: 0 0 12px 0; 
+            font-size: 1.05rem; 
+            font-weight: 600;
+            color: var(--text-main); 
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border); 
+            padding-bottom: 8px; 
+        }
+        .container {
+            display: flex; 
+            width: 100%; 
+            gap: 16px; 
+            align-items: stretch;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .col-left { flex: 1; max-width: 380px; display: flex; flex-direction: column; gap: 16px; height: 100%; }
+        .col-right { flex: 2; display: flex; flex-direction: column; gap: 16px; height: 100%; overflow: hidden; }
+        
+        .box { 
+            background: var(--card-bg); 
+            padding: 16px; 
+            border-radius: var(--radius); 
+            box-shadow: var(--shadow); 
+            border: 1px solid var(--border);
+            box-sizing: border-box;
+        }
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        input, select, button { 
+            width: 100%; 
+            padding: 10px; 
+            margin-bottom: 10px; 
+            box-sizing: border-box; 
+            border-radius: 8px; 
+            border: 1px solid var(--border); 
+            font-size: 0.9rem; 
+            background: var(--card-bg-inner);
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+            background: var(--card-bg-inner);
+        }
+        
+        button { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: 600; 
+            margin-bottom: 0;
+        }
+        button:hover { background: var(--primary-hover); }
+        
+        button.btn-success { background: var(--success); }
+        button.btn-success:hover { background: var(--success-hover); }
+        button.btn-danger { background: var(--danger); }
+        button.btn-danger:hover { background: var(--danger-hover); }
+        button.btn-borrar { 
+            background: rgba(239, 68, 68, 0.15); 
+            color: var(--danger-hover); 
+            padding: 4px 10px; 
+            font-size: 0.75rem; 
+            width: auto; 
+            margin: 0; 
+        }
+        button.btn-borrar:hover { background: var(--danger); color: white; }
+        
+        .form-row { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            margin-bottom: 10px; 
+        } 
+        .form-row > div { width: 100%; }
+        
+        .btn-group { display: flex; gap: 10px; }
+        .btn-group button { flex: 1; }
+
+        .modo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+        .modo-btn {
+            padding: 6px 2px;
+            font-size: 0.8rem;
+            background: var(--card-bg-inner);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .modo-btn:hover {
+            background: var(--border);
+            color: var(--text-main);
+        }
+        .modo-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+        }
+        .utc-clock-box {
+            background: var(--card-bg-inner);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            margin-top: auto;
+        }
+        .utc-time {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ff4444;
+            letter-spacing: 0.05em;
+            font-family: monospace;
+            line-height: 1.1;
+        }
+        .utc-date {
+            font-size: 0.8rem;
+            color: #ffffff;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .tabla-container { 
+            flex: 1; 
+            overflow-y: auto; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            background: var(--card-bg);
+        }
+        
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); } 
+        th, td { padding: 10px 12px; text-align: left; font-size: 0.9rem; }
+        th { 
+            background: var(--card-bg-inner); 
+            color: var(--text-muted); 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            font-size: 0.75rem; 
+            letter-spacing: 0.05em;
+            position: sticky; 
+            top: 0; 
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+        }
+        td { border-bottom: 1px solid var(--border); color: var(--text-main); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255, 255, 255, 0.03); }
+        
+        #contador-bloque { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            background: var(--card-bg); 
+            padding: 14px 20px; 
+            border-radius: var(--radius); 
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border); 
+            margin-top: 0;
+            box-sizing: border-box;
+        }
+        #contador { font-size: 2.2rem; color: var(--success); font-weight: 700; line-height: 1; }
+        
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(4px);
+            z-index: 100; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .modal-content { 
+            background: var(--card-bg); 
+            padding: 24px; 
+            border-radius: var(--radius); 
+            width: 90%; 
+            max-width: 400px; 
+            position: relative; 
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+            border: 1px solid var(--border);
+        }
+        .modal-close { 
+            position: absolute; 
+            top: 12px; 
+            right: 16px; 
+            font-size: 1.5rem;
+            cursor: pointer; 
+            color: var(--text-muted);
+        }
+        .modal-close:hover { color: var(--text-main); }
+        
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+        .header-flex h2 { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .search-input { max-width: 180px; margin-bottom: 0; padding: 6px 12px; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="col-left">
+            <div class="box">
+                <h2>Gestión de Actividad</h2>
+                <div class="btn-group">
+                    <button onclick="abrirModal()">Nueva</button>
+                    <button class="btn-danger" onclick="finalizarActividad()">Finalizar</button>
+                </div>
+            </div>
+
+            <div class="box" style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 4px; overflow: hidden;">
+                <h2>Registro de QSO</h2>
+                <div class="form-row">
+                    <div>
+                        <label for="freq">Frecuencia (MHz):</label>
+                        <input type="text" id="freq" placeholder="ej. 14.244,00" onblur="formatearFrecuenciaInput(this)" style="margin-bottom: 8px; font-size: 1.6rem; font-weight: 800; padding: 6px 12px; letter-spacing: 0.02em;">
+                    </div>
+                    <div>
+                        <label>Modo:</label>
+                        <div class="modo-grid">
+                            <div class="modo-btn" onclick="seleccionarModo('FM', this)">FM</div>
+                            <div class="modo-btn" onclick="seleccionarModo('AM', this)">AM</div>
+                            <div class="modo-btn" onclick="seleccionarModo('CW', this)">CW</div>
+                            <div class="modo-btn active" onclick="seleccionarModo('SSB', this)">SSB</div>
+                            <div class="modo-btn" onclick="seleccionarModo('FT8', this)">FT8</div>
+                            <div class="modo-btn" onclick="seleccionarModo('FT4', this)">FT4</div>
+                            <div class="modo-btn" onclick="seleccionarModo('FT2', this)">FT2</div>
+                            <div class="modo-btn" onclick="seleccionarModo('RTTY', this)">RTTY</div>
+                            <div class="modo-btn" onclick="seleccionarModo('VARA', this)">VARA</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row" style="flex-direction: row; gap: 10px; margin-bottom: 0;">
+                    <div style="flex: 2;">
+                        <label for="callsign">Indicativo Corresponsal:</label>
+                        <input type="text" id="callsign" placeholder="EA1ABC" onkeyup="manejarEscritura(event)" autofocus autocomplete="off" style="margin-bottom: 0;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="rstInput">RST:</label>
+                        <input type="text" id="rstInput" placeholder="59" maxlength="3" style="margin-bottom: 0; text-align: center; font-weight: bold; color: var(--success);">
+                    </div>
+                </div>
+                
+                <button class="btn-success" style="margin-top: 10px; margin-bottom: 8px;" onclick="guardarContacto()">Registrar Contacto (Enter)</button>
+
+                <div style="margin-top: 4px; padding: 10px; border: 1px dashed var(--border); border-radius: 8px; background: rgba(59, 130, 246, 0.05);">
+                    <label for="inputAnuncioTexto" style="color: var(--primary-hover);"> PUBLICAR ANUNCIO EN VIVO:</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="inputAnuncioTexto" placeholder="Ej: QRT en 10 min..." onkeyup="if(event.key==='Enter') guardarAnuncioAdmin()" style="margin-bottom: 0; font-size: 0.85rem; padding: 6px 12px;">
+                        <button onclick="guardarAnuncioAdmin()" style="width: auto; padding: 0 14px; font-size: 0.85rem;">Enviar</button>
+                    </div>
+                </div>
+
+                <div class="utc-clock-box">
+                    <div class="utc-time" id="reloj-tiempo">00:00:00 UTC</div>
+                    <div class="utc-date" id="reloj-fecha">01 ENE 2026</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-right">
+            <div class="box" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+                <div class="header-flex">
+                    <h2>Historial de QSOs</h2>
+                    <input type="text" id="buscarHistorial" class="search-input" placeholder="Buscar indicativo..." onkeyup="filtrarHistorial(event)">
+                </div>
+                <div class="tabla-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Indicativo</th>
+                                <th>Frecuencia</th>
+                                <th>Modo</th>
+                                <th>RST</th>
+                                <th>Fecha UTC</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaContactos"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="contador-bloque">
+                <span style="font-size: 1.05rem; font-weight: 600; color: var(--text-muted);">Total de Contactos:</span>
+                <div id="contador">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalActividad" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="cerrarModal()">&times;</span>
+            <h2>Configurar Actividad</h2>
+            
+            <label for="miIndicativo">Mi Indicativo:</label>
+            <input type="text" id="miIndicativo" placeholder="EA1ABC">
+            
+            <label for="tipoActividad">Tipo Actividad:</label>
+            <select id="tipoActividad">
+                <option value="POTA">POTA (Parks on the Air)</option>
+                <option value="SOTA">SOTA (Summits on the Air)</option>
+                <option value="IOTA">IOTA (Islands on the Air)</option>
+                <option value="BOTA">BOTA (Beaches on the Air)</option>
+            </select>
+            
+            <label for="referenciaActividad">Referencia:</label>
+            <input type="text" id="referenciaActividad" placeholder="E-0145">
+
+            <label for="miGrid">Mi Grid Locator:</label>
+            <input type="text" id="miGrid" placeholder="ej. IN80do" maxlength="6">
+            
+            <label for="fileQsl">Imagen de Fondo QSL:</label>
+            <input type="file" id="fileQsl" accept="image/*" style="border: dashed 2px var(--border); background: var(--card-bg-inner); padding: 12px; cursor: pointer;">
+            
+            <button class="btn-success" style="margin-top: 10px;" onclick="iniciarNuevaActividad()">Guardar e Iniciar</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            cargarHistorial();
+            actualizarRelojUTC();
+            setInterval(actualizarRelojUTC, 1000);
+
+            document.getElementById('rstInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') { guardarContacto(); }
+            });
+        };
+        
+        var tempBusqueda;
+        var todosLosContactos = []; 
+        var modoSeleccionado = 'SSB';
+        
+        var cacheMiIndicativo = "EA";
+        var cacheTipoActividad = "POTA";
+        var cacheReferenciaReal = "-";
+        var cacheMiGrid = "IN80";
+
+        function actualizarRelojUTC() {
+            var ahora = new Date();
+            var h = String(ahora.getUTCHours()).padStart(2, '0');
+            var m = String(ahora.getUTCMinutes()).padStart(2, '0');
+            var s = String(ahora.getUTCSeconds()).padStart(2, '0');
+            document.getElementById('reloj-tiempo').innerText = h + ':' + m + ':' + s + ' UTC';
+
+            var meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            var d = String(ahora.getUTCDate()).padStart(2, '0');
+            var mes = meses[ahora.getUTCMonth()];
+            var a = ahora.getUTCFullYear();
+            document.getElementById('reloj-fecha').innerText = d + ' ' + mes + ' ' + a;
+        }
+
+        function formatearFrecuenciaInput(input) {
+            var valor = input.value.trim();
+            if(!valor) return;
+            if (/^\d{1,3}(\.\d{3})*,\d{2}$/.test(valor)) return;
+            
+            valor = valor.replace(/\./g, '');
+            valor = valor.replace(/,/g, '.');
+            
+            var n = parseFloat(valor);
+            if (isNaN(n)) return;
+            
+            var cadenaFija = n.toFixed(2); 
+            var partes = cadenaFija.split('.');
+            var parteEntera = partes[0];
+            var parteDecimal = partes[1];
+            
+            parteEntera = parteEntera.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            input.value = parteEntera + ',' + parteDecimal;
+        }
+
+        function seleccionarModo(modo, elemento) {
+            modoSeleccionado = modo;
+            var botones = document.querySelectorAll('.modo-btn');
+            for(var i = 0; i < botones.length; i++) {
+                botones[i].classList.remove('active');
+            }
+            elemento.classList.add('active');
+        }
+
+        function abrirModal() { document.getElementById('modalActividad').style.display = 'flex'; }
+        function cerrarModal() { document.getElementById('modalActividad').style.display = 'none'; }
+        async function manejarEscritura(e) {
+            var call = e.target.value.trim().toUpperCase();
+            if (e.key === 'Enter') {
+                clearTimeout(tempBusqueda);
+                if (!call) return;
+                guardarContacto();
+                return;
+            }
+            if (call.length < 3) return;
+            clearTimeout(tempBusqueda);
+        }
+
+        async function guardarContacto() {
+            var callInput = document.getElementById('callsign');
+            var rstInput = document.getElementById('rstInput');
+            var freqInput = document.getElementById('freq');
+            
+            formatearFrecuenciaInput(freqInput);
+            var indicativo = callInput.value.trim();
+            var frecuencia = freqInput.value.trim();
+            var modo = modoSeleccionado;
+            var rstValor = rstInput.value.trim() || "59";
+
+            if(!indicativo || !frecuencia) return alert("Rellena frecuencia e indicativo");
+
+            try {
+                var res = await fetch('/api/contactos', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ indicativo: indicativo, frecuencia: frecuencia, modo: modo, nombre: rstValor, qth: '' })
+                });
+                var data = await res.json();
+                if (!data.success && data.duplicado) {
+                    alert(data.error);
+                    callInput.focus();
+                    return;
+                }
+                if(data.success) {
+                    callInput.value = '';
+                    rstInput.value = ''; 
+                    callInput.focus();
+                    cargarHistorial();
+                }
+            } catch (error) {
+                alert("Error de conexión al guardar el contacto");
+            }
+        }
+
+        async function guardarAnuncioAdmin() {
+            const inputAnuncio = document.getElementById('inputAnuncioTexto');
+            const textoMensaje = inputAnuncio.value.trim();
+            
+            if (!textoMensaje) return;
+
+            try {
+                var res = await fetch('/api/publicar-anuncio', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ mensaje: textoMensaje })
+                });
+                var data = await res.json();
+                if(data.success) {
+                    inputAnuncio.value = '';
+                    cargarHistorial(); 
+                } else {
+                    alert("Error en la respuesta del servidor al publicar el anuncio: " + (data.error || "Desconocido"));
+                }
+            } catch (error) {
+                alert("Error de conexión local con la base de datos.");
+            }
+        }
+
+        async function cargarHistorial() {
+            try {
+                var res = await fetch('/api/contactos');
+                var data = await res.json();
+                todosLosContactos = data.lista || []; 
+                
+                const qsosReales = todosLosContactos.filter(c => c.indicativo && !c.indicativo.startsWith("||_ANUNCIO_OFICIAL_POTA_||"));
+                document.getElementById('contador').innerText = qsosReales.length;
+                
+                renderizarTabla(todosLosContactos); 
+                
+                if(data.actividad) {
+                    cacheMiIndicativo = data.actividad.mi_indicativo || "EA";
+                    cacheTipoActividad = data.actividad.tipo || "POTA";
+                    if(data.actividad.referencia !== "-" && !data.actividad.tipo.includes("_FINALIZADA")) {
+                        cacheReferenciaReal = data.actividad.referencia;
+                    }
+                    cacheMiGrid = data.actividad.mi_grid || "IN80";
+                }
+            } catch (error) {
+                console.error("Error al cargar el historial:", error);
+            }
+        }
+
+        function filtrarHistorial(e) {
+            var termino = e.target.value.trim().toUpperCase();
+            if (!termino) {
+                renderizarTabla(todosLosContactos); 
+                return;
+            }
+            var filtrados = todosLosContactos.filter(function(c) {
+                return c.indicativo.trim().toUpperCase().includes(termino);
+            });
+            renderizarTabla(filtrados);
+        }
+        function renderizarTabla(contactos) {
+            var html = '';
+            for(var i = 0; i < contactos.length; i++) {
+                var c = contactos[i];
+                
+                if (c.indicativo && c.indicativo.startsWith("||_ANUNCIO_OFICIAL_POTA_||")) {
+                    html += '<tr style="background: rgba(245, 158, 11, 0.05);">' +
+                            '<td colspan="5"><span style="color: #f59e0b; font-weight: bold;"> ANUNCIO ACTIVO:</span> <span style="color: var(--text-main); font-weight: 500; margin-left: 5px;">' + (c.nombre || c.frecuencia || '') + '</span></td>' +
+                            '<td><button class="btn-borrar" onclick="eliminarContacto(' + c.id + ')">Quitar</button></td>' +
+                            '</tr>';
+                } else {
+                    var freqTexto = c.frecuencia.includes('MHz') ? c.frecuencia : c.frecuencia + ' MHz';
+                    html += '<tr>' +
+                            '<td><strong style="color: var(--primary);">' + c.indicativo + '</strong></td>' +
+                            '<td>' + freqTexto + '</td>' +
+                            '<td><span style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">' + (c.modo || 'SSB') + '</span></td>' +
+                            '<td><span style="font-weight: bold; color: var(--success);">' + (c.nombre || '59') + '</span></td>' +
+                            '<td><span style="color: var(--text-muted); font-size: 0.85rem;">' + c.fecha + '</span></td>' +
+                            '<td><button class="btn-borrar" onclick="eliminarContacto(' + c.id + ')">Borrar</button></td>' +
+                            '</tr>';
+                }
+            }
+            document.getElementById('tablaContactos').innerHTML = html;
+        }
+
+        async function eliminarContacto(id) {
+            if(confirm("¿Deseas borrar este registro?")) {
+                try {
+                    await fetch('/api/contactos/' + id, { method: 'DELETE' });
+                    cargarHistorial();
+                } catch (error) {
+                    alert("No se pudo eliminar el contacto");
+                }
+            }
+        }
+
+        async function iniciarNuevaActividad() {
+            var miInd = document.getElementById('miIndicativo').value.trim();
+            var miGrid = document.getElementById('miGrid').value.trim();
+            var tipo = document.getElementById('tipoActividad').value;
+            var ref = document.getElementById('referenciaActividad').value.trim();
+
+            if(!miInd || !miGrid) return alert("Por favor, introduce tu Indicativo y tu Grid Locator");
+            if(!confirm("¿Estás seguro de que deseas iniciar una NUEVA actividad? Esto vaciará el historial actual.")) return;
+
+            cacheMiIndicativo = miInd.toUpperCase();
+            cacheTipoActividad = tipo;
+            cacheReferenciaReal = ref.toUpperCase();
+            cacheMiGrid = miGrid.toUpperCase();
+
+            try {
+                var resAct = await fetch('/api/actividad', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ mi_indicativo: cacheMiIndicativo, tipo: cacheTipoActividad, referencia: cacheReferenciaReal, mi_grid: cacheMiGrid })
+                });
+                var dataAct = await resAct.json();
+                if(!dataAct.success) return alert("Error al registrar los datos de la actividad");
+
+                for(var i = 0; i < todosLosContactos.length; i++) {
+                    await fetch('/api/contactos/' + todosLosContactos[i].id, { method: 'DELETE' });
+                }
+            } catch(e) {
+                console.error("Error inicializando actividad:", e);
+                return alert("Error de conexión al configurar la actividad");
+            }
+
+            var fileInput = document.getElementById('fileQsl');
+            if(fileInput.files.length > 0) {
+                var formData = new FormData();
+                formData.append("fondo", fileInput.files[0]);
+                try {
+                    await fetch('/api/upload-bg', { method: 'POST', body: formData });
+                } catch (e) {
+                    return alert("Error al subir la imagen de fondo de la QSL");
+                }
+            }
+            alert("Nueva actividad iniciada con Grid " + cacheMiGrid + ". Historial vaciado.");
+            cerrarModal();
+            cargarHistorial(); 
+        }
+
+        async function finalizarActividad() {
+            if(!confirm("¿Estás seguro de que deseas finalizar la actividad actual?")) return;
+            try {
+                await fetch('/api/actividad', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ mi_indicativo: cacheMiIndicativo, tipo: cacheTipoActividad + "_FINALIZADA", referencia: cacheReferenciaReal, mi_grid: cacheMiGrid })
+                });
+                window.location.href = window.location.origin + '/admin/resumen.html';
+            } catch (e) {
+                window.location.href = window.location.origin + '/admin/resumen.html';
+            }
+        }
+    </script>
+</body>
+</html>
